@@ -6,8 +6,8 @@
   "scope": "/MenuAtor2000/",
   "display": "standalone",
   "orientation": "portrait",
-  "background_color": "#FFFFFF",
-  "theme_color": "#E8581A",
+  "background_color": "#FDFCFA",
+  "theme_color": "#7A1518",
   "icons": [
     {
       "src": "icon-192.png",
