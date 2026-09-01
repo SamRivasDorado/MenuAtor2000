@@ -7,7 +7,6 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="MenuAtor">
-<link rel="manifest" href="manifest.json">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <title>MenuAtor 2000</title>
@@ -1093,8 +1092,16 @@ function buildToggles() {
   const nutriEl = document.getElementById('toggle-nutri');
   const propsEl = document.getElementById('toggle-props');
   if (!nutriEl || !propsEl) return;
-  nutriEl.innerHTML = NUTRI_FIELDS.map(f => '<button class="toggle-btn" id="tog-' + f + '" onclick="toggleField('' + f + '')"><div class="toggle-check"><svg width="10" height="10" viewBox="0 0 12 12" fill="none" stroke="white" stroke-width="2.2" stroke-linecap="round"><path d="M2 6l3 3 5-5"/></svg></div>' + f + '</button>').join('');
-  propsEl.innerHTML = PROP_FIELDS.map(([f,label]) => '<button class="toggle-btn" id="tog-' + f + '" onclick="toggleField('' + f + '')"><div class="toggle-check"><svg width="10" height="10" viewBox="0 0 12 12" fill="none" stroke="white" stroke-width="2.2" stroke-linecap="round"><path d="M2 6l3 3 5-5"/></svg></div>' + label + '</button>').join('');
+  nutriEl.innerHTML = NUTRI_FIELDS.map(f =>
+    '<button class="toggle-btn" id="tog-' + f + '" onclick="toggleField(\'' + f + '\')">' +
+    '<div class="toggle-check"><svg width="10" height="10" viewBox="0 0 12 12" fill="none" stroke="white" stroke-width="2.2" stroke-linecap="round"><path d="M2 6l3 3 5-5"/></svg></div>' +
+    f + '</button>'
+  ).join('');
+  propsEl.innerHTML = PROP_FIELDS.map(([f,label]) =>
+    '<button class="toggle-btn" id="tog-' + f + '" onclick="toggleField(\'' + f + '\')">' +
+    '<div class="toggle-check"><svg width="10" height="10" viewBox="0 0 12 12" fill="none" stroke="white" stroke-width="2.2" stroke-linecap="round"><path d="M2 6l3 3 5-5"/></svg></div>' +
+    label + '</button>'
+  ).join('');
 }
 
 function toggleField(f) { document.getElementById('tog-'+f).classList.toggle('on'); }
