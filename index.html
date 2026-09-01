@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<meta name="theme-color" content="#7A1518">
+<meta name="theme-color" content="#C9980A">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="MenuAtor">
@@ -14,19 +14,19 @@
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 :root {
-  --accent: #7A1518;
-  --accent-light: #FDF0E8;
-  --accent-dark: #B83E08;
-  --green: #3B6D11;
-  --green-light: #EAF3DE;
+  --accent: #C9980A;
+  --accent-light: #FDF6E3;
+  --accent-dark: #8B6A00;
+  --green: #2D5A27;
+  --green-light: #EAF2E8;
   --blue: #185FA5;
   --blue-light: #E6F1FB;
-  --amber: #854F0B;
-  --amber-light: #FAEEDA;
-  --bg: #FFFFFF;
-  --bg-secondary: #F5F4F0;
-  --text: #1A1A18;
-  --text-secondary: #6B6B66;
+  --amber: #7A4F1A;
+  --amber-light: #F5EDE0;
+  --bg: #FDFCFA;
+  --bg-secondary: #F0EDE5;
+  --text: #1C1A16;
+  --text-secondary: #6B6560;
   --border: rgba(0,0,0,0.1);
   --font-display: -apple-system, 'SF Pro Display', 'Helvetica Neue', sans-serif;
   --font-body: -apple-system, 'SF Pro Text', 'Helvetica Neue', sans-serif;
@@ -36,15 +36,15 @@
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --bg: #1A1A18;
-    --bg-secondary: #2A2A28;
-    --text: #F0EFE8;
-    --text-secondary: #9A9A94;
+    --bg: #1C1A16;
+    --bg-secondary: #2A2620;
+    --text: #F0EDE5;
+    --text-secondary: #9A9488;
     --border: rgba(255,255,255,0.1);
-    --accent-light: #3A1A08;
-    --green-light: #0A2004;
+    --accent-light: #3A2E00;
+    --green-light: #0F2010;
     --blue-light: #041C3A;
-    --amber-light: #2A1404;
+    --amber-light: #2A1C08;
   }
 }
 
@@ -224,11 +224,11 @@ html, body {
 .option-btn.selected {
   border-color: var(--accent);
   border-width: 1.5px;
-  background: var(--accent-light);
-  color: var(--accent-dark);
+  background: rgba(201,152,10,0.18);
+  color: var(--text);
 }
 
-.option-btn.selected i { color: var(--accent); }
+.option-btn.selected svg { stroke: var(--text); }
 
 /* PRIO BUTTONS */
 .prio-grid { display: flex; flex-direction: column; gap: 8px; }
@@ -255,12 +255,12 @@ html, body {
 .prio-btn.selected {
   border-color: var(--accent);
   border-width: 1.5px;
-  background: var(--accent-light);
+  background: rgba(201,152,10,0.18);
 }
 
-.prio-btn.selected i,
-.prio-btn.selected .prio-main { color: var(--accent-dark); }
-.prio-btn.selected .prio-sub { color: var(--accent); }
+.prio-btn.selected svg { stroke: var(--text); }
+.prio-btn.selected .prio-main { color: var(--text); }
+.prio-btn.selected .prio-sub { color: var(--text-secondary); }
 
 /* GENERATE BUTTON */
 .generate-btn {
@@ -434,6 +434,13 @@ html, body {
 }
 
 .chip.active { background: var(--accent); border-color: var(--accent); color: white; }
+.chip.active[data-cat="Carne"]     { background: #C0152A; border-color: #C0152A; }
+.chip.active[data-cat="Ave"]       { background: #D4799A; border-color: #D4799A; }
+.chip.active[data-cat="Pescado"]   { background: #185FA5; border-color: #185FA5; }
+.chip.active[data-cat="Verdura"]   { background: #639922; border-color: #639922; }
+.chip.active[data-cat="Legumbres"] { background: #6B3E1A; border-color: #6B3E1A; }
+.chip.active[data-cat="Facil"]     { background: #D4641A; border-color: #D4641A; }
+.chip.active[data-cat="Cena"]      { background: #6B21A8; border-color: #6B21A8; }
 
 .plato-row {
   display: flex;
@@ -626,9 +633,9 @@ html, body {
 }
 
 .toggle-btn.on {
-  background: var(--accent-light);
+  background: rgba(201,152,10,0.18);
   border-color: var(--accent);
-  color: var(--accent-dark);
+  color: var(--text);
   font-weight: 500;
 }
 
@@ -821,7 +828,7 @@ html, body {
 
   <!-- LOADING OVERLAY -->
   <div id="loading-overlay" style="display:flex;position:absolute;inset:0;background:var(--bg);z-index:200;align-items:center;justify-content:center;flex-direction:column;gap:14px;">
-    <div style="width:36px;height:36px;border:3px solid rgba(122,21,24,0.2);border-top-color:#7A1518;border-radius:50%;animation:spin 0.7s linear infinite;"></div>
+    <div style="width:36px;height:36px;border:3px solid rgba(201,152,10,0.2);border-top-color:#C9980A;border-radius:50%;animation:spin 0.7s linear infinite;"></div>
     <p style="font-size:13px;color:var(--text-secondary);">Cargando platos...</p>
   </div>
 
@@ -924,7 +931,7 @@ function showLoadingOverlay(show) {
 }
 
 const NUTRI_COLS   = ['Carne','Ave','Pescado','Verdura','Legumbres','CH','Huevo','Lacteos'];
-const NUTRI_COLORS = ['#C0152A','#D4799A','#185FA5','#639922','#6B3E1A','#C9980A','#D4641A','#B0ACA4'];
+const NUTRI_COLORS = ['#C0152A','#D4799A','#185FA5','#639922','#6B3E1A','#E8C32A','#D4641A','#B0ACA4'];
 const DAYS = ['Lunes','Martes','Miércoles','Jueves','Viernes','Sábado','Domingo'];
 
 let appState = { lunches:5, dinners:5, easy:2, prio:'balanced', menu:null };
