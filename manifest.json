@@ -1,0 +1,25 @@
+{
+  "name": "MenuAtor 2000",
+  "short_name": "MenuAtor",
+  "description": "Generador de menús semanales",
+  "start_url": "/MenuAtor2000/",
+  "scope": "/MenuAtor2000/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#FDFCFA",
+  "theme_color": "#7A1518",
+  "icons": [
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
