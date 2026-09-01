@@ -1,5 +1,4 @@
 <!DOCTYPE html>
-<!-- v3 -->
 <html lang="es">
 <head>
 <meta charset="UTF-8">
@@ -8,6 +7,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="MenuAtor">
+<link rel="manifest" href="manifest.json">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <title>MenuAtor 2000</title>
@@ -16,16 +16,16 @@
 
 :root {
   --accent: #7A1518;
-  --accent-light: #F5EAEA;
-  --accent-dark: #4D0D0F;
-  --green: #2D5A27;
-  --green-light: #EAF2E8;
+  --accent-light: #FDF0E8;
+  --accent-dark: #B83E08;
+  --green: #3B6D11;
+  --green-light: #EAF3DE;
   --blue: #185FA5;
   --blue-light: #E6F1FB;
-  --amber: #7A4F1A;
-  --amber-light: #F5EDE0;
-  --bg: #FDFCFA;
-  --bg-secondary: #F0EDE5;
+  --amber: #854F0B;
+  --amber-light: #FAEEDA;
+  --bg: #FFFFFF;
+  --bg-secondary: #F5F4F0;
   --text: #1A1A18;
   --text-secondary: #6B6B66;
   --border: rgba(0,0,0,0.1);
@@ -37,15 +37,15 @@
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --bg: #1C1A16;
-    --bg-secondary: #2A2620;
+    --bg: #1A1A18;
+    --bg-secondary: #2A2A28;
     --text: #F0EFE8;
     --text-secondary: #9A9A94;
     --border: rgba(255,255,255,0.1);
-    --accent-light: #3A1010;
-    --green-light: #0F2010;
+    --accent-light: #3A1A08;
+    --green-light: #0A2004;
     --blue-light: #041C3A;
-    --amber-light: #2A1C08;
+    --amber-light: #2A1404;
   }
 }
 
@@ -512,7 +512,7 @@ html, body {
 
 .btn-sm:active { transform: scale(0.96); }
 .btn-sm.accent { background: var(--accent); border-color: var(--accent); color: white; }
-.btn-sm.danger { background: #F5EAEA; border-color: var(--accent); color: var(--accent-dark); }
+.btn-sm.danger { background: #FDF0E8; border-color: var(--accent); color: var(--accent-dark); }
 
 .plato-actions {
   display: flex;
@@ -534,7 +534,7 @@ html, body {
 }
 
 .icon-btn:active { transform: scale(0.9); }
-.icon-btn.delete:active { background: #F5EAEA; color: var(--accent); }
+.icon-btn.delete:active { background: #FDF0E8; color: var(--accent); }
 .icon-btn.edit:active { background: var(--blue-light); color: var(--blue); }
 
 /* MODAL */
@@ -822,7 +822,7 @@ html, body {
 
   <!-- LOADING OVERLAY -->
   <div id="loading-overlay" style="display:flex;position:absolute;inset:0;background:var(--bg);z-index:200;align-items:center;justify-content:center;flex-direction:column;gap:14px;">
-    <div style="width:36px;height:36px;border:3px solid rgba(232,88,26,0.2);border-top-color:#7A1518;border-radius:50%;animation:spin 0.7s linear infinite;"></div>
+    <div style="width:36px;height:36px;border:3px solid rgba(122,21,24,0.2);border-top-color:#7A1518;border-radius:50%;animation:spin 0.7s linear infinite;"></div>
     <p style="font-size:13px;color:var(--text-secondary);">Cargando platos...</p>
   </div>
 
@@ -849,15 +849,19 @@ html, body {
 const SHEETS_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSH4vqQ8RFMO7rXcLbhgYRxClgDMW_6HoEKA5kCRnpsqxPYeNe2Nr5Ar9CGO1ues2TBCPOhTSWyNxEw/pub?output=csv";
 let DB = [];
 
+// ── LOCAL STORAGE ─────────────────────────────────────────────────────────────
+const LS_KEY = 'menuator_local_changes';
+let localChanges = false;
+
 async function loadDB() {
-  // Check if we have local overrides first
   try {
     const saved = localStorage.getItem(LS_KEY);
     if (saved) {
       DB = JSON.parse(saved);
       localChanges = true;
       showLoadingOverlay(false);
-      document.getElementById('export-bar').classList.add('visible');
+      const eb = document.getElementById('export-bar');
+      if (eb) eb.classList.add('visible');
       renderPlatos();
       return;
     }
@@ -877,9 +881,7 @@ async function loadDB() {
   } catch(e) {
     showLoadingOverlay(false);
     const isTimeout = e.name === 'AbortError';
-    const msg = isTimeout
-      ? 'La conexión tardó demasiado.<br>Comprueba tu conexión e inténtalo de nuevo.'
-      : 'No se pudo cargar la lista de platos.<br>Comprueba tu conexión e inténtalo de nuevo.';
+    const msg = isTimeout ? 'La conexión tardó demasiado.<br>Comprueba tu conexión e inténtalo de nuevo.' : 'No se pudo cargar la lista de platos.<br>Comprueba tu conexión e inténtalo de nuevo.';
     document.getElementById('loading-overlay').innerHTML =
       '<div style="text-align:center;padding:28px 20px">' +
       '<svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="var(--text-secondary)" stroke-width="1.5" stroke-linecap="round" style="display:block;margin:0 auto 14px;opacity:0.5"><path d="M2 2l20 20M8.5 8.5A7 7 0 0112 8c2.1 0 4 .9 5.4 2.3M3.1 5.1A11.9 11.9 0 0112 4c3.3 0 6.3 1.3 8.5 3.5M12 18h.01M6.3 12.3A7 7 0 0112 11"/></svg>' +
@@ -891,14 +893,14 @@ async function loadDB() {
 
 function parseCSV(text) {
   const lines = text.trim().split('\n');
-  const rawHeaders = lines[0].split(',').map(h => h.trim().replace(/^"|"$/g, ''));
+  const headers = lines[0].split(',').map(h => h.trim().replace(/^"|"$/g, ''));
   return lines.slice(1).map(line => {
     const cols = splitCSVLine(line);
     const row = {};
-    rawHeaders.forEach((h, i) => {
+    headers.forEach((h, i) => {
       const val = (cols[i] || '').trim().replace(/^"|"$/g, '');
-      const boolCols = ['Carne','Ave','Pescado','Verdura','Legumbres','CH','Huevo','Lacteos','Facil','Cena'];
-      row[h] = boolCols.includes(h) ? (val === '1' || val.toLowerCase() === 'true' ? 1 : 0) : val;
+      const bools = ['Carne','Ave','Pescado','Verdura','Legumbres','CH','Huevo','Lacteos','Facil','Cena'];
+      row[h] = bools.includes(h) ? (val === '1' || val.toLowerCase() === 'true' ? 1 : 0) : val;
     });
     row.name = row['Comida'] || '';
     return row;
@@ -919,10 +921,10 @@ function splitCSVLine(line) {
 
 function showLoadingOverlay(show) {
   const el = document.getElementById('loading-overlay');
-  el.style.display = show ? 'flex' : 'none';
+  if (el) el.style.display = show ? 'flex' : 'none';
 }
 
-const NUTRI_COLS = ['Carne','Ave','Pescado','Verdura','Legumbres','CH','Huevo','Lacteos'];
+const NUTRI_COLS   = ['Carne','Ave','Pescado','Verdura','Legumbres','CH','Huevo','Lacteos'];
 const NUTRI_COLORS = ['#C0152A','#D4799A','#185FA5','#639922','#6B3E1A','#C9980A','#D4641A','#B0ACA4'];
 const DAYS = ['Lunes','Martes','Miércoles','Jueves','Viernes','Sábado','Domingo'];
 
@@ -943,8 +945,6 @@ function pick(btn) {
   if (group === 'prio') appState.prio = btn.dataset.val;
 }
 
-function randChoice(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
-
 function generateMenu() {
   if (!DB.length) { alert('La base de platos aún no está lista. Espera un momento.'); return; }
   const btn = document.getElementById('gen-btn');
@@ -955,83 +955,54 @@ function generateMenu() {
     const L = appState.lunches, D = appState.dinners;
     const lunchPool = DB.filter(d => !d.Cena);
     const dbEasyPct = (DB.filter(d => d.Facil).length / DB.length) * 100;
-
     let best = null, bestScore = Infinity;
 
     for (let iter = 0; iter < 600; iter++) {
       const used = new Set();
       const lIdxs = [], dIdxs = [];
-
-      // Pick lunches
-      const lPool = lunchPool.filter((_, j) => !used.has(DB.indexOf(lunchPool[j])));
       const lShuffle = [...lunchPool].sort(() => Math.random() - 0.5);
       for (let i = 0; i < Math.min(L, lShuffle.length); i++) {
         const idx = DB.indexOf(lShuffle[i]);
         if (!used.has(idx)) { used.add(idx); lIdxs.push(idx); }
       }
-
-      // Pick dinners
       const dShuffle = DB.map((_,i) => i).sort(() => Math.random() - 0.5);
       for (let i = 0; i < dShuffle.length && dIdxs.length < D; i++) {
         if (!used.has(dShuffle[i])) { used.add(dShuffle[i]); dIdxs.push(dShuffle[i]); }
       }
-
       if (lIdxs.length < L || dIdxs.length < D) continue;
 
       const allIdxs = [...lIdxs, ...dIdxs];
       const total = L + D;
       const nutriPct = NUTRI_COLS.map(col => (allIdxs.reduce((s, i) => s + DB[i][col], 0) / total) * 100);
-      const easyPct = (allIdxs.reduce((s, i) => s + DB[i].Facil, 0) / total) * 100;
-
+      const easyPct  = (allIdxs.reduce((s, i) => s + DB[i].Facil, 0) / total) * 100;
       const mean = nutriPct.reduce((a, b) => a + b, 0) / nutriPct.length;
-      const std = Math.sqrt(nutriPct.reduce((s, x) => s + (x - mean) ** 2, 0) / nutriPct.length);
+      const std  = Math.sqrt(nutriPct.reduce((s, x) => s + (x - mean) ** 2, 0) / nutriPct.length);
       const nScore = mean === 0 ? 1 : Math.min((std / mean) / 3, 1);
-
       const target = appState.easy === 3 ? Math.min(dbEasyPct * 1.8, 100) : appState.easy === 2 ? dbEasyPct : dbEasyPct / 2;
       const maxDist = Math.max(target, 100 - target);
       const eScore = maxDist === 0 ? 0 : Math.min(Math.abs(easyPct - target) / maxDist, 1);
-
       const sc = appState.prio === 'nutrition' ? nScore : appState.prio === 'easyness' ? eScore : 0.5 * nScore + 0.5 * eScore;
-
-      if (sc < bestScore) {
-        bestScore = sc;
-        best = { lIdxs, dIdxs, nutriPct, easyPct, nScore, eScore, sc };
-      }
+      if (sc < bestScore) { bestScore = sc; best = { lIdxs, dIdxs, nutriPct, easyPct, nScore, eScore, sc }; }
     }
 
     appState.menu = best;
     renderMenu(best, L, D);
     document.getElementById('menu-dot').classList.add('visible');
     showTab('menu');
-
     btn.innerHTML = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.5 4.5L18 9l-4.5 1.5L12 15l-1.5-4.5L6 9l4.5-1.5z"/><path d="M5 3l.75 2.25L8 6l-2.25.75L5 9l-.75-2.25L2 6l2.25-.75z"/><path d="M19 15l.75 2.25L22 18l-2.25.75L19 21l-.75-2.25L16 18l2.25-.75z"/></svg> Generar menú';
     btn.disabled = false;
   }, 60);
 }
 
 function calcDiversity(nutriPct) {
-  // Shannon entropy-based diversity index, normalised to 0-100
-  // nutriPct: array of % values for 8 categories (can be 0)
   const total = nutriPct.reduce((a, b) => a + b, 0);
   if (total === 0) return 0;
-
-  // Proportion of each category relative to total category hits
   const props = nutriPct.map(p => p / total);
-
-  // Shannon entropy H = -sum(p * ln(p)) for p > 0
   const H = props.reduce((sum, p) => p > 0 ? sum - p * Math.log(p) : sum, 0);
-
-  // Max entropy = ln(N) where N = number of categories with any presence
   const N = props.filter(p => p > 0).length;
   const H_max = N > 1 ? Math.log(N) : 1;
-
-  // Evenness (Pielou J): how evenly distributed among present categories
   const evenness = H / H_max;
-
-  // Richness bonus: reward having more of the 8 categories represented
   const richness = N / 8;
-
-  // Combined: 60% evenness + 40% richness, scaled to 0-100
   return Math.round((0.6 * evenness + 0.4 * richness) * 100);
 }
 
@@ -1040,1071 +1011,52 @@ function renderMenu(menu, L, D) {
   const diversityScore = calcDiversity(menu.nutriPct);
   const r = 20, circ = 2 * Math.PI * r;
   const offset = circ * (1 - diversityScore / 100);
-
-  const ringColor = diversityScore >= 70 ? '#D4799A' : diversityScore >= 40 ? '#6B3E1A' : '#C0152A';
-  const ringBg    = diversityScore >= 70 ? 'rgba(59,109,17,0.12)' : diversityScore >= 40 ? 'rgba(133,79,11,0.12)' : 'rgba(216,90,48,0.12)';
-  const cardBg    = diversityScore >= 70 ? 'var(--green-light)' : diversityScore >= 40 ? 'var(--amber-light)' : '#F5EAEA';
-  const diversityLabel = diversityScore >= 70 ? 'Menú muy variado' : diversityScore >= 40 ? 'Variedad moderada' : 'Menú poco variado';
-
-  let html = `
-    <div class="score-card fade-in" style="background:${cardBg}">
-      <div class="score-ring">
-        <svg viewBox="0 0 52 52">
-          <circle cx="26" cy="26" r="${r}" fill="none" stroke="${ringBg}" stroke-width="5"/>
-          <circle cx="26" cy="26" r="${r}" fill="none" stroke="${ringColor}" stroke-width="5"
-            stroke-dasharray="${circ.toFixed(2)}" stroke-dashoffset="${offset.toFixed(2)}"
-            stroke-linecap="round" transform="rotate(-90 26 26)"/>
-          <text x="26" y="30" text-anchor="middle" font-size="12" font-weight="700" fill="${ringColor}" font-family="-apple-system,sans-serif">${diversityScore}</text>
-        </svg>
-      </div>
-      <div>
-        <div class="score-info-title" style="color:${ringColor}">${diversityLabel}</div>
-        <div class="score-info-detail">
-          Índice de diversidad nutricional<br>
-          Platos fáciles: <b>${Math.round(menu.easyPct)}%</b>
-        </div>
-      </div>
-    </div>`;ml>
-<html lang="es">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<meta name="theme-color" content="#7A1518">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="default">
-<meta name="apple-mobile-web-app-title" content="MenuAtor">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="default">
-<title>MenuAtor 2000</title>
-<style>
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-:root {
-  --accent: #7A1518;
-  --accent-light: #F5EAEA;
-  --accent-dark: #4D0D0F;
-  --green: #2D5A27;
-  --green-light: #EAF2E8;
-  --blue: #185FA5;
-  --blue-light: #E6F1FB;
-  --amber: #7A4F1A;
-  --amber-light: #F5EDE0;
-  --bg: #FDFCFA;
-  --bg-secondary: #F0EDE5;
-  --text: #1A1A18;
-  --text-secondary: #6B6B66;
-  --border: rgba(0,0,0,0.1);
-  --font-display: -apple-system, 'SF Pro Display', 'Helvetica Neue', sans-serif;
-  --font-body: -apple-system, 'SF Pro Text', 'Helvetica Neue', sans-serif;
-  --radius-md: 10px;
-  --radius-lg: 16px;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --bg: #1C1A16;
-    --bg-secondary: #2A2620;
-    --text: #F0EFE8;
-    --text-secondary: #9A9A94;
-    --border: rgba(255,255,255,0.1);
-    --accent-light: #3A1010;
-    --green-light: #0F2010;
-    --blue-light: #041C3A;
-    --amber-light: #2A1C08;
-  }
-}
-
-html, body {
-  height: 100%;
-  font-family: var(--font-body);
-  background: var(--bg-secondary);
-  color: var(--text);
-  -webkit-font-smoothing: antialiased;
-}
-
-.app {
-  max-width: 430px;
-  margin: 0 auto;
-  height: 100dvh;
-  display: flex;
-  flex-direction: column;
-  background: var(--bg);
-  position: relative;
-  overflow: hidden;
-}
-
-/* HEADER */
-.header {
-  padding: 52px 20px 0;
-  background: var(--bg);
-  flex-shrink: 0;
-}
-
-.header-inner {
-  display: flex;
-  align-items: baseline;
-  gap: 8px;
-  padding-bottom: 14px;
-  border-bottom: 0.5px solid var(--border);
-}
-
-.header-title {
-  font-family: var(--font-display);
-  font-size: 22px;
-  font-weight: 800;
-  color: var(--text);
-  letter-spacing: -0.5px;
-}
-
-.header-title .accent { color: var(--accent); }
-.header-year { font-size: 13px; color: var(--text-secondary); font-weight: 400; }
-
-/* SCREENS */
-.screens { flex: 1; overflow: hidden; position: relative; }
-.screen { position: absolute; inset: 0; overflow-y: auto; padding: 16px 20px 100px; display: none; }
-.screen.active { display: block; }
-
-/* TAB BAR */
-.tabbar {
-  position: absolute;
-  bottom: 0; left: 0; right: 0;
-  background: var(--bg);
-  border-top: 0.5px solid var(--border);
-  display: flex;
-  padding: 10px 0 env(safe-area-inset-bottom, 12px);
-  z-index: 100;
-  flex-shrink: 0;
-}
-
-.tab {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 3px;
-  cursor: pointer;
-  padding: 4px 0;
-  border: none;
-  background: none;
-  color: var(--text-secondary);
-  font-family: var(--font-body);
-  font-size: 10px;
-  transition: color 0.15s;
-  position: relative;
-}
-
-.tab i { font-size: 23px; }
-.tab.active { color: var(--accent); }
-
-.tab-dot {
-  position: absolute;
-  top: 2px; right: calc(50% - 18px);
-  width: 7px; height: 7px;
-  background: var(--accent);
-  border-radius: 50%;
-  display: none;
-  border: 1.5px solid var(--bg);
-}
-.tab-dot.visible { display: block; }
-
-/* SECTION LABEL */
-.section-label {
-  font-family: var(--font-display);
-  font-size: 10px;
-  font-weight: 700;
-  letter-spacing: 1.2px;
-  text-transform: uppercase;
-  color: var(--text-secondary);
-  margin: 22px 0 10px;
-}
-
-/* STEPPERS */
-.stepper {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  background: var(--bg-secondary);
-  border-radius: var(--radius-md);
-  padding: 11px 14px;
-  margin-bottom: 8px;
-}
-
-.stepper-label { flex: 1; }
-.stepper-label .main { font-size: 14px; font-weight: 500; color: var(--text); }
-.stepper-label .sub { font-size: 11px; color: var(--text-secondary); margin-top: 1px; }
-
-.stepper-btn {
-  width: 32px; height: 32px;
-  border-radius: 50%;
-  border: 0.5px solid var(--border);
-  background: var(--bg);
-  cursor: pointer;
-  font-size: 20px;
-  line-height: 1;
-  display: flex; align-items: center; justify-content: center;
-  color: var(--text);
-  transition: all 0.1s;
-  font-family: var(--font-body);
-  -webkit-tap-highlight-color: transparent;
-}
-
-.stepper-btn:active { transform: scale(0.9); background: var(--bg-secondary); }
-
-.stepper-val {
-  font-family: var(--font-display);
-  font-size: 20px;
-  font-weight: 700;
-  min-width: 22px;
-  text-align: center;
-  color: var(--text);
-}
-
-/* OPTION BUTTONS */
-.option-grid {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 8px;
-  margin-bottom: 4px;
-}
-
-.option-btn {
-  border: 0.5px solid var(--border);
-  border-radius: var(--radius-md);
-  padding: 11px 8px;
-  background: var(--bg);
-  cursor: pointer;
-  font-family: var(--font-body);
-  font-size: 12px;
-  color: var(--text);
-  text-align: center;
-  transition: all 0.12s;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 5px;
-  -webkit-tap-highlight-color: transparent;
-}
-
-.option-btn i { font-size: 18px; color: var(--text-secondary); }
-
-.option-btn.selected {
-  border-color: var(--accent);
-  border-width: 1.5px;
-  background: var(--accent-light);
-  color: var(--accent-dark);
-}
-
-.option-btn.selected i { color: var(--accent); }
-
-/* PRIO BUTTONS */
-.prio-grid { display: flex; flex-direction: column; gap: 8px; }
-
-.prio-btn {
-  border: 0.5px solid var(--border);
-  border-radius: var(--radius-md);
-  padding: 12px 14px;
-  background: var(--bg);
-  cursor: pointer;
-  font-family: var(--font-body);
-  text-align: left;
-  transition: all 0.12s;
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  -webkit-tap-highlight-color: transparent;
-}
-
-.prio-btn i { font-size: 20px; color: var(--text-secondary); flex-shrink: 0; }
-.prio-btn .prio-main { font-size: 14px; font-weight: 500; color: var(--text); }
-.prio-btn .prio-sub { font-size: 11px; color: var(--text-secondary); margin-top: 1px; }
-
-.prio-btn.selected {
-  border-color: var(--accent);
-  border-width: 1.5px;
-  background: var(--accent-light);
-}
-
-.prio-btn.selected i,
-.prio-btn.selected .prio-main { color: var(--accent-dark); }
-.prio-btn.selected .prio-sub { color: var(--accent); }
-
-/* GENERATE BUTTON */
-.generate-btn {
-  width: 100%;
-  padding: 16px;
-  background: var(--accent);
-  color: white;
-  border: none;
-  border-radius: var(--radius-lg);
-  font-family: var(--font-display);
-  font-size: 15px;
-  font-weight: 700;
-  cursor: pointer;
-  margin-top: 28px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  transition: all 0.15s;
-  letter-spacing: 0.3px;
-  -webkit-tap-highlight-color: transparent;
-}
-
-.generate-btn:active { transform: scale(0.98); background: var(--accent-dark); }
-.generate-btn:disabled { background: var(--text-secondary); cursor: not-allowed; transform: none; }
-
-/* MENU SCREEN */
-.score-card {
-  background: var(--accent-light);
-  border-radius: var(--radius-lg);
-  padding: 14px 16px;
-  margin-bottom: 16px;
-  display: flex;
-  align-items: center;
-  gap: 14px;
-}
-
-.score-ring { width: 52px; height: 52px; flex-shrink: 0; }
-.score-ring svg { width: 52px; height: 52px; }
-
-.score-info-title {
-  font-family: var(--font-display);
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.5px;
-  color: var(--accent-dark);
-  text-transform: uppercase;
-}
-
-.score-info-detail {
-  font-size: 12px;
-  color: var(--text-secondary);
-  margin-top: 3px;
-  line-height: 1.5;
-}
-
-.day-card {
-  border: 0.5px solid var(--border);
-  border-radius: var(--radius-lg);
-  overflow: hidden;
-  margin-bottom: 10px;
-}
-
-.day-header {
-  background: var(--bg-secondary);
-  padding: 8px 14px;
-  font-family: var(--font-display);
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.8px;
-  color: var(--text-secondary);
-  text-transform: uppercase;
-}
-
-.meal-row {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 11px 14px;
-  border-bottom: 0.5px solid var(--border);
-}
-
-.meal-row:last-child { border-bottom: none; }
-
-.meal-icon {
-  width: 36px; height: 36px;
-  border-radius: 10px;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 16px;
-  flex-shrink: 0;
-}
-
-.meal-icon.lunch { background: var(--amber-light); color: var(--amber); }
-.meal-icon.dinner { background: var(--blue-light); color: var(--blue); }
-
-.meal-type {
-  font-size: 10px;
-  font-weight: 500;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  color: var(--text-secondary);
-  margin-bottom: 2px;
-}
-
-.meal-name { font-size: 13px; color: var(--text); line-height: 1.3; }
-
-.nutri-row {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin-bottom: 10px;
-}
-
-.nutri-label { font-size: 12px; color: var(--text-secondary); width: 76px; flex-shrink: 0; }
-
-.nutri-bar-bg {
-  flex: 1;
-  height: 6px;
-  background: var(--bg-secondary);
-  border-radius: 3px;
-  overflow: hidden;
-}
-
-.nutri-bar-fill { height: 100%; border-radius: 3px; transition: width 0.5s cubic-bezier(.4,0,.2,1); }
-.nutri-pct { font-size: 12px; font-weight: 500; color: var(--text); width: 32px; text-align: right; flex-shrink: 0; }
-
-/* PLATOS SCREEN */
-.search-bar {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  background: var(--bg-secondary);
-  border-radius: var(--radius-md);
-  padding: 10px 13px;
-  margin-bottom: 12px;
-}
-
-.search-bar i { color: var(--text-secondary); font-size: 16px; flex-shrink: 0; }
-
-.search-bar input {
-  flex: 1;
-  border: none;
-  background: none;
-  font-family: var(--font-body);
-  font-size: 14px;
-  color: var(--text);
-  outline: none;
-}
-
-.search-bar input::placeholder { color: var(--text-secondary); }
-
-.filter-chips {
-  display: flex;
-  gap: 6px;
-  flex-wrap: wrap;
-  margin-bottom: 14px;
-}
-
-.chip {
-  padding: 5px 11px;
-  border-radius: 20px;
-  font-size: 11px;
-  font-weight: 500;
-  border: 0.5px solid var(--border);
-  background: var(--bg);
-  cursor: pointer;
-  color: var(--text-secondary);
-  transition: all 0.12s;
-  font-family: var(--font-body);
-  -webkit-tap-highlight-color: transparent;
-}
-
-.chip.active { background: var(--accent); border-color: var(--accent); color: white; }
-
-.plato-row {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 11px 0;
-  border-bottom: 0.5px solid var(--border);
-}
-
-.plato-name { flex: 1; font-size: 13px; color: var(--text); line-height: 1.35; }
-.plato-cats { font-size: 11px; color: var(--text-secondary); margin-top: 2px; }
-
-.plato-tags { display: flex; gap: 4px; flex-wrap: wrap; justify-content: flex-end; }
-
-.tag {
-  font-size: 10px;
-  padding: 2px 7px;
-  border-radius: 5px;
-  font-weight: 500;
-  white-space: nowrap;
-}
-
-.tag-cena { background: var(--blue-light); color: var(--blue); }
-.tag-facil { background: var(--green-light); color: var(--green); }
-
-.empty-state {
-  text-align: center;
-  padding: 60px 20px;
-  color: var(--text-secondary);
-}
-
-.empty-state i { font-size: 48px; margin-bottom: 14px; display: block; opacity: 0.5; }
-.empty-state .empty-title { font-family: var(--font-display); font-size: 16px; font-weight: 700; color: var(--text); margin-bottom: 8px; }
-.empty-state p { font-size: 13px; line-height: 1.6; }
-
-.spinner {
-  display: inline-block;
-  width: 16px; height: 16px;
-  border: 2.5px solid rgba(255,255,255,0.35);
-  border-top-color: white;
-  border-radius: 50%;
-  animation: spin 0.65s linear infinite;
-  vertical-align: middle;
-}
-
-@keyframes spin { to { transform: rotate(360deg); } }
-
-.fade-in { animation: fadeIn 0.22s ease both; }
-@keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: none; } }
-
-/* PLATOS MANAGEMENT */
-.platos-toolbar {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 12px;
-}
-
-.btn-sm {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  padding: 7px 13px;
-  border-radius: var(--radius-md);
-  border: 0.5px solid var(--border);
-  background: var(--bg);
-  font-family: var(--font-body);
-  font-size: 12px;
-  font-weight: 500;
-  color: var(--text);
-  cursor: pointer;
-  transition: all 0.12s;
-  -webkit-tap-highlight-color: transparent;
-}
-
-.btn-sm:active { transform: scale(0.96); }
-.btn-sm.accent { background: var(--accent); border-color: var(--accent); color: white; }
-.btn-sm.danger { background: #F5EAEA; border-color: var(--accent); color: var(--accent-dark); }
-
-.plato-actions {
-  display: flex;
-  gap: 6px;
-  flex-shrink: 0;
-}
-
-.icon-btn {
-  width: 30px; height: 30px;
-  border-radius: 8px;
-  border: 0.5px solid var(--border);
-  background: var(--bg-secondary);
-  display: flex; align-items: center; justify-content: center;
-  cursor: pointer;
-  color: var(--text-secondary);
-  transition: all 0.12s;
-  -webkit-tap-highlight-color: transparent;
-  flex-shrink: 0;
-}
-
-.icon-btn:active { transform: scale(0.9); }
-.icon-btn.delete:active { background: #F5EAEA; color: var(--accent); }
-.icon-btn.edit:active { background: var(--blue-light); color: var(--blue); }
-
-/* MODAL */
-.modal-backdrop {
-  display: none;
-  position: fixed;
-  inset: 0;
-  background: rgba(0,0,0,0.5);
-  z-index: 300;
-  align-items: flex-end;
-  justify-content: center;
-}
-
-.modal-backdrop.open { display: flex; }
-
-.modal {
-  background: var(--bg);
-  border-radius: 20px 20px 0 0;
-  padding: 20px 20px 40px;
-  width: 100%;
-  max-width: 430px;
-  max-height: 90dvh;
-  overflow-y: auto;
-  animation: slideUp 0.22s ease;
-}
-
-@keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
-
-.modal-handle {
-  width: 36px; height: 4px;
-  background: var(--border);
-  border-radius: 2px;
-  margin: 0 auto 18px;
-}
-
-.modal-title {
-  font-family: var(--font-display);
-  font-size: 17px;
-  font-weight: 700;
-  color: var(--text);
-  margin-bottom: 18px;
-}
-
-.field-group { margin-bottom: 14px; }
-
-.field-label {
-  font-size: 11px;
-  font-weight: 500;
-  text-transform: uppercase;
-  letter-spacing: 0.8px;
-  color: var(--text-secondary);
-  margin-bottom: 6px;
-}
-
-.field-input {
-  width: 100%;
-  padding: 10px 12px;
-  border: 0.5px solid var(--border);
-  border-radius: var(--radius-md);
-  background: var(--bg-secondary);
-  font-family: var(--font-body);
-  font-size: 14px;
-  color: var(--text);
-  outline: none;
-  transition: border-color 0.15s;
-}
-
-.field-input:focus { border-color: var(--accent); }
-
-.toggle-grid {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 7px;
-}
-
-.toggle-btn {
-  display: flex;
-  align-items: center;
-  gap: 7px;
-  padding: 9px 11px;
-  border: 0.5px solid var(--border);
-  border-radius: var(--radius-md);
-  background: var(--bg);
-  cursor: pointer;
-  font-family: var(--font-body);
-  font-size: 12px;
-  color: var(--text-secondary);
-  transition: all 0.12s;
-  -webkit-tap-highlight-color: transparent;
-}
-
-.toggle-btn.on {
-  background: var(--accent-light);
-  border-color: var(--accent);
-  color: var(--accent-dark);
-  font-weight: 500;
-}
-
-.toggle-check {
-  width: 16px; height: 16px;
-  border-radius: 4px;
-  border: 1.5px solid var(--border);
-  background: var(--bg);
-  flex-shrink: 0;
-  display: flex; align-items: center; justify-content: center;
-}
-
-.toggle-btn.on .toggle-check {
-  background: var(--accent);
-  border-color: var(--accent);
-}
-
-.modal-actions {
-  display: flex;
-  gap: 8px;
-  margin-top: 20px;
-}
-
-.btn-full {
-  flex: 1;
-  padding: 13px;
-  border-radius: var(--radius-md);
-  border: 0.5px solid var(--border);
-  background: var(--bg-secondary);
-  font-family: var(--font-body);
-  font-size: 14px;
-  font-weight: 500;
-  color: var(--text);
-  cursor: pointer;
-  transition: all 0.12s;
-  -webkit-tap-highlight-color: transparent;
-}
-
-.btn-full.primary {
-  background: var(--accent);
-  border-color: var(--accent);
-  color: white;
-}
-
-.btn-full:active { transform: scale(0.98); }
-
-.local-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  font-size: 10px;
-  padding: 3px 8px;
-  border-radius: 20px;
-  background: var(--amber-light);
-  color: var(--amber);
-  font-weight: 500;
-  margin-left: 6px;
-}
-
-.export-bar {
-  display: none;
-  background: var(--amber-light);
-  border: 0.5px solid rgba(133,79,11,0.2);
-  border-radius: var(--radius-md);
-  padding: 10px 13px;
-  margin-bottom: 12px;
-  align-items: center;
-  gap: 10px;
-}
-
-.export-bar.visible { display: flex; }
-.export-bar p { flex: 1; font-size: 12px; color: var(--amber); line-height: 1.4; }
-
-</style>
-</head>
-<body>
-
-<div class="app">
-
-  <div class="header">
-    <div class="header-inner">
-      <span class="header-title">Menu<span class="accent">Ator</span></span>
-      <span class="header-year">2000</span>
-    </div>
-  </div>
-
-  <div class="screens">
-
-    <!-- GENERAR -->
-    <div class="screen active" id="screen-generar">
-
-      <div class="section-label">Comidas y cenas</div>
-
-      <div class="stepper">
-        <div class="stepper-label">
-          <div class="main">Comidas</div>
-          <div class="sub">por semana</div>
-        </div>
-        <button class="stepper-btn" onclick="step('lunches',-1)" aria-label="Reducir comidas">−</button>
-        <span class="stepper-val" id="val-lunches">5</span>
-        <button class="stepper-btn" onclick="step('lunches',1)" aria-label="Aumentar comidas">+</button>
-      </div>
-
-      <div class="stepper">
-        <div class="stepper-label">
-          <div class="main">Cenas</div>
-          <div class="sub">por semana</div>
-        </div>
-        <button class="stepper-btn" onclick="step('dinners',-1)" aria-label="Reducir cenas">−</button>
-        <span class="stepper-val" id="val-dinners">5</span>
-        <button class="stepper-btn" onclick="step('dinners',1)" aria-label="Aumentar cenas">+</button>
-      </div>
-
-      <div class="section-label">Facilidad</div>
-      <div class="option-grid">
-        <button class="option-btn" data-group="easy" data-val="1" onclick="pick(this)">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 12c0-3 2.5-5 2.5-8A6.5 6.5 0 006 10c0 4.5 3.5 6 3.5 9a3 3 0 006 0c0-2-1.5-3.5-1.5-5.5C14 12.5 12 11 12 12z"/></svg>Elaborado
-        </button>
-        <button class="option-btn selected" data-group="easy" data-val="2" onclick="pick(this)">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h16M8 6a2 2 0 100-4 2 2 0 000 4zM4 12h16M16 12a2 2 0 100-4 2 2 0 000 4zM4 18h16M8 18a2 2 0 100-4 2 2 0 000 4z"/></svg>Normal
-        </button>
-        <button class="option-btn" data-group="easy" data-val="3" onclick="pick(this)">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M13 3L4 14h7l-1 7 9-11h-7l1-7z"/></svg>Fácil
-        </button>
-      </div>
-
-      <div class="section-label">Prioridad</div>
-      <div class="prio-grid">
-        <button class="prio-btn" data-group="prio" data-val="nutrition" onclick="pick(this)">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 20c0-8 6-14 15-14-1 7-5 12-10 13.5"/><path d="M6 20c2-4 4-7 9-10"/></svg>
-          <div>
-            <div class="prio-main">Nutrición</div>
-            <div class="prio-sub">Máximo equilibrio de categorías</div>
-          </div>
-        </button>
-        <button class="prio-btn" data-group="prio" data-val="easyness" onclick="pick(this)">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>
-          <div>
-            <div class="prio-main">Facilidad</div>
-            <div class="prio-sub">Ajuste al nivel de dificultad</div>
-          </div>
-        </button>
-        <button class="prio-btn selected" data-group="prio" data-val="balanced" onclick="pick(this)">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v18M3 9l4-4 5 5 5-5 4 4M5 20h14"/></svg>
-          <div>
-            <div class="prio-main">Equilibrado</div>
-            <div class="prio-sub">50% nutrición · 50% facilidad</div>
-          </div>
-        </button>
-      </div>
-
-      <button class="generate-btn" id="gen-btn" onclick="generateMenu()">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.5 4.5L18 9l-4.5 1.5L12 15l-1.5-4.5L6 9l4.5-1.5z"/><path d="M5 3l.75 2.25L8 6l-2.25.75L5 9l-.75-2.25L2 6l2.25-.75z"/><path d="M19 15l.75 2.25L22 18l-2.25.75L19 21l-.75-2.25L16 18l2.25-.75z"/></svg> Generar menú
-      </button>
-
-    </div>
-
-    <!-- MI MENÚ -->
-    <div class="screen" id="screen-menu">
-      <div id="menu-content">
-        <div class="empty-state">
-          <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11c0-4 3.5-7 9-7s9 3 9 7H3z"/><path d="M3 11c0 4 3 7 9 7s9-3 9-7"/><path d="M9 11c0-2 1.5-4 3-4"/><path d="M15 11c-.5-1.5-2-3-3-3"/></svg>
-          <div class="empty-title">Sin menú todavía</div>
-          <p>Ve a la pestaña <b>Generar</b>, ajusta los parámetros y pulsa el botón.</p>
-        </div>
-      </div>
-    </div>
-
-    <!-- PLATOS -->
-    <div class="screen" id="screen-platos">
-      <div class="search-bar">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.35-4.35"/></svg>
-        <input type="text" placeholder="Buscar plato..." id="search-input" oninput="renderPlatos()">
-      </div>
-      <div class="filter-chips">
-        <button class="chip active" data-cat="todos" onclick="setFilter(this)">Todos</button>
-        <button class="chip" data-cat="Carne" onclick="setFilter(this)">Carne</button>
-        <button class="chip" data-cat="Ave" onclick="setFilter(this)">Ave</button>
-        <button class="chip" data-cat="Pescado" onclick="setFilter(this)">Pescado</button>
-        <button class="chip" data-cat="Verdura" onclick="setFilter(this)">Verdura</button>
-        <button class="chip" data-cat="Legumbres" onclick="setFilter(this)">Legumbres</button>
-        <button class="chip" data-cat="Facil" onclick="setFilter(this)">Fácil</button>
-        <button class="chip" data-cat="Cena" onclick="setFilter(this)">Solo cena</button>
-      </div>
-      <div id="platos-list"></div>
-    </div>
-
-  </div>
-
-
-  <!-- LOADING OVERLAY -->
-  <div id="loading-overlay" style="display:flex;position:absolute;inset:0;background:var(--bg);z-index:200;align-items:center;justify-content:center;flex-direction:column;gap:14px;">
-    <div style="width:36px;height:36px;border:3px solid rgba(232,88,26,0.2);border-top-color:#7A1518;border-radius:50%;animation:spin 0.7s linear infinite;"></div>
-    <p style="font-size:13px;color:var(--text-secondary);">Cargando platos...</p>
-  </div>
-
-  <!-- TAB BAR -->
-  <nav class="tabbar">
-    <button class="tab active" id="tab-generar" onclick="showTab('generar')" aria-label="Generar menú">
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.5 4.5L18 9l-4.5 1.5L12 15l-1.5-4.5L6 9l4.5-1.5z"/><path d="M5 3l.75 2.25L8 6l-2.25.75L5 9l-.75-2.25L2 6l2.25-.75z"/><path d="M19 15l.75 2.25L22 18l-2.25.75L19 21l-.75-2.25L16 18l2.25-.75z"/></svg>
-      <span>Generar</span>
-    </button>
-    <button class="tab" id="tab-menu" onclick="showTab('menu')" aria-label="Mi menú" style="position:relative;">
-      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="5" width="16" height="16" rx="2"/><path d="M16 3v4M8 3v4M4 9h16"/><path d="M8 13h2v2H8z M14 13h2v2h-2z M8 17h2v2H8z"/></svg>
-      <span>Mi menú</span>
-      <div class="tab-dot" id="menu-dot"></div>
-    </button>
-    <button class="tab" id="tab-platos" onclick="showTab('platos')" aria-label="Lista de platos">
-      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19V7a4 4 0 014-4h10a1 1 0 011 1v14"/><path d="M4 19a2 2 0 002 2h13a1 1 0 001-1v-1"/><path d="M9 7h6M9 11h6"/></svg>
-      <span>Platos</span>
-    </button>
-  </nav>
-
-</div>
-
-<script>
-const SHEETS_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSH4vqQ8RFMO7rXcLbhgYRxClgDMW_6HoEKA5kCRnpsqxPYeNe2Nr5Ar9CGO1ues2TBCPOhTSWyNxEw/pub?output=csv";
-let DB = [];
-
-async function loadDB() {
-  // Check if we have local overrides first
-  try {
-    const saved = localStorage.getItem(LS_KEY);
-    if (saved) {
-      DB = JSON.parse(saved);
-      localChanges = true;
-      showLoadingOverlay(false);
-      document.getElementById('export-bar').classList.add('visible');
-      renderPlatos();
-      return;
+  const ringColor = diversityScore >= 70 ? '#2D5A27' : diversityScore >= 40 ? '#7A4F1A' : '#C0152A';
+  const ringBg    = diversityScore >= 70 ? 'rgba(45,90,39,0.12)' : diversityScore >= 40 ? 'rgba(122,79,26,0.12)' : 'rgba(192,21,42,0.12)';
+  const cardBg    = diversityScore >= 70 ? 'var(--green-light)' : diversityScore >= 40 ? 'var(--amber-light)' : 'var(--accent-light)';
+  const label     = diversityScore >= 70 ? 'Menú muy variado' : diversityScore >= 40 ? 'Variedad moderada' : 'Menú poco variado';
+
+  let html = '<div class="score-card fade-in" style="background:' + cardBg + '">'
+    + '<div class="score-ring"><svg viewBox="0 0 52 52">'
+    + '<circle cx="26" cy="26" r="' + r + '" fill="none" stroke="' + ringBg + '" stroke-width="5"/>'
+    + '<circle cx="26" cy="26" r="' + r + '" fill="none" stroke="' + ringColor + '" stroke-width="5"'
+    + ' stroke-dasharray="' + circ.toFixed(2) + '" stroke-dashoffset="' + offset.toFixed(2) + '"'
+    + ' stroke-linecap="round" transform="rotate(-90 26 26)"/>'
+    + '<text x="26" y="30" text-anchor="middle" font-size="12" font-weight="700" fill="' + ringColor + '" font-family="-apple-system,sans-serif">' + diversityScore + '</text>'
+    + '</svg></div>'
+    + '<div><div class="score-info-title" style="color:' + ringColor + '">' + label + '</div>'
+    + '<div class="score-info-detail">Índice de diversidad nutricional<br>Platos fáciles: <b>' + Math.round(menu.easyPct) + '%</b></div>'
+    + '</div></div>';
+
+  days.forEach((day, i) => {
+    html += '<div class="day-card fade-in" style="animation-delay:' + (i*0.04).toFixed(2) + 's"><div class="day-header">' + day + '</div>';
+    if (i < L) {
+      const p = DB[menu.lIdxs[i]];
+      html += '<div class="meal-row"><div class="meal-icon lunch"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M2 12h2M20 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg></div><div><div class="meal-type">Comida</div><div class="meal-name">' + p.name + '</div></div></div>';
     }
-  } catch(e) {}
-
-  showLoadingOverlay(true);
-  try {
-    const controller = new AbortController();
-    const timer = setTimeout(() => controller.abort(), 8000);
-    const res = await fetch(SHEETS_URL, { signal: controller.signal });
-    clearTimeout(timer);
-    if (!res.ok) throw new Error('HTTP ' + res.status);
-    const text = await res.text();
-    DB = parseCSV(text);
-    showLoadingOverlay(false);
-    renderPlatos();
-  } catch(e) {
-    showLoadingOverlay(false);
-    document.getElementById('loading-overlay').innerHTML =
-      '<div style="text-align:center;padding:20px">' +
-      '<svg style="font-size:40px;color:var(--text-secondary);display:block;margin-bottom:12px" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2 2l20 20M8.5 8.5A7 7 0 0112 8c2.1 0 4 .9 5.4 2.3M3.1 5.1A11.9 11.9 0 0112 4c3.3 0 6.3 1.3 8.5 3.5M12 18h.01M6.3 12.3A7 7 0 0112 11"/></svg>' +
-      '<p style="color:var(--text-secondary);font-size:14px;margin-bottom:16px">No se pudo cargar la lista de platos.<br>Comprueba tu conexión.</p>' +
-      '<button onclick="loadDB()" style="padding:10px 24px;background:var(--accent);color:white;border:none;border-radius:10px;font-family:var(--font-body);font-size:14px;cursor:pointer">Reintentar</button>' +
-      '</div>';
-  }
-}
-
-function parseCSV(text) {
-  const lines = text.trim().split('\n');
-  const rawHeaders = lines[0].split(',').map(h => h.trim().replace(/^"|"$/g, ''));
-  return lines.slice(1).map(line => {
-    const cols = splitCSVLine(line);
-    const row = {};
-    rawHeaders.forEach((h, i) => {
-      const val = (cols[i] || '').trim().replace(/^"|"$/g, '');
-      const boolCols = ['Carne','Ave','Pescado','Verdura','Legumbres','CH','Huevo','Lacteos','Facil','Cena'];
-      row[h] = boolCols.includes(h) ? (val === '1' || val.toLowerCase() === 'true' ? 1 : 0) : val;
-    });
-    row.name = row['Comida'] || '';
-    return row;
-  }).filter(r => r.name.trim());
-}
-
-function splitCSVLine(line) {
-  const result = []; let cur = '', inQ = false;
-  for (let i = 0; i < line.length; i++) {
-    const ch = line[i];
-    if (ch === '"') { inQ = !inQ; }
-    else if (ch === ',' && !inQ) { result.push(cur); cur = ''; }
-    else { cur += ch; }
-  }
-  result.push(cur);
-  return result;
-}
-
-function showLoadingOverlay(show) {
-  const el = document.getElementById('loading-overlay');
-  el.style.display = show ? 'flex' : 'none';
-}
-
-const NUTRI_COLS = ['Carne','Ave','Pescado','Verdura','Legumbres','CH','Huevo','Lacteos'];
-const NUTRI_COLORS = ['#C0152A','#D4799A','#185FA5','#639922','#6B3E1A','#C9980A','#D4641A','#B0ACA4'];
-const DAYS = ['Lunes','Martes','Miércoles','Jueves','Viernes','Sábado','Domingo'];
-
-let appState = { lunches:5, dinners:5, easy:2, prio:'balanced', menu:null };
-let activeFilter = 'todos';
-
-function step(key, delta) {
-  const k = key === 'lunches' ? 'lunches' : 'dinners';
-  appState[k] = Math.max(1, Math.min(7, appState[k] + delta));
-  document.getElementById('val-' + key).textContent = appState[k];
-}
-
-function pick(btn) {
-  const group = btn.dataset.group;
-  document.querySelectorAll('[data-group="' + group + '"]').forEach(b => b.classList.remove('selected'));
-  btn.classList.add('selected');
-  if (group === 'easy') appState.easy = parseInt(btn.dataset.val);
-  if (group === 'prio') appState.prio = btn.dataset.val;
-}
-
-function randChoice(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
-
-function generateMenu() {
-  if (!DB.length) { alert('La base de platos aún no está lista. Espera un momento.'); return; }
-  const btn = document.getElementById('gen-btn');
-  btn.innerHTML = '<div class="spinner"></div>&nbsp; Generando...';
-  btn.disabled = true;
-
-  setTimeout(() => {
-    const L = appState.lunches, D = appState.dinners;
-    const lunchPool = DB.filter(d => !d.Cena);
-    const dbEasyPct = (DB.filter(d => d.Facil).length / DB.length) * 100;
-
-    let best = null, bestScore = Infinity;
-
-    for (let iter = 0; iter < 600; iter++) {
-      const used = new Set();
-      const lIdxs = [], dIdxs = [];
-
-      // Pick lunches
-      const lPool = lunchPool.filter((_, j) => !used.has(DB.indexOf(lunchPool[j])));
-      const lShuffle = [...lunchPool].sort(() => Math.random() - 0.5);
-      for (let i = 0; i < Math.min(L, lShuffle.length); i++) {
-        const idx = DB.indexOf(lShuffle[i]);
-        if (!used.has(idx)) { used.add(idx); lIdxs.push(idx); }
-      }
-
-      // Pick dinners
-      const dShuffle = DB.map((_,i) => i).sort(() => Math.random() - 0.5);
-      for (let i = 0; i < dShuffle.length && dIdxs.length < D; i++) {
-        if (!used.has(dShuffle[i])) { used.add(dShuffle[i]); dIdxs.push(dShuffle[i]); }
-      }
-
-      if (lIdxs.length < L || dIdxs.length < D) continue;
-
-      const allIdxs = [...lIdxs, ...dIdxs];
-      const total = L + D;
-      const nutriPct = NUTRI_COLS.map(col => (allIdxs.reduce((s, i) => s + DB[i][col], 0) / total) * 100);
-      const easyPct = (allIdxs.reduce((s, i) => s + DB[i].Facil, 0) / total) * 100;
-
-      const mean = nutriPct.reduce((a, b) => a + b, 0) / nutriPct.length;
-      const std = Math.sqrt(nutriPct.reduce((s, x) => s + (x - mean) ** 2, 0) / nutriPct.length);
-      const nScore = mean === 0 ? 1 : Math.min((std / mean) / 3, 1);
-
-      const target = appState.easy === 3 ? Math.min(dbEasyPct * 1.8, 100) : appState.easy === 2 ? dbEasyPct : dbEasyPct / 2;
-      const maxDist = Math.max(target, 100 - target);
-      const eScore = maxDist === 0 ? 0 : Math.min(Math.abs(easyPct - target) / maxDist, 1);
-
-      const sc = appState.prio === 'nutrition' ? nScore : appState.prio === 'easyness' ? eScore : 0.5 * nScore + 0.5 * eScore;
-
-      if (sc < bestScore) {
-        bestScore = sc;
-        best = { lIdxs, dIdxs, nutriPct, easyPct, nScore, eScore, sc };
-      }
+    if (i < D) {
+      const p = DB[menu.dIdxs[i]];
+      html += '<div class="meal-row"><div class="meal-icon dinner"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg></div><div><div class="meal-type">Cena</div><div class="meal-name">' + p.name + '</div></div></div>';
     }
+    html += '</div>';
+  });
 
-    appState.menu = best;
-    renderMenu(best, L, D);
-    document.getElementById('menu-dot').classList.add('visible');
-    showTab('menu');
+  html += '<div class="section-label" style="margin-top:22px">Perfil nutricional</div>';
+  NUTRI_COLS.forEach((col, i) => {
+    const pct = Math.round(menu.nutriPct[i]);
+    html += '<div class="nutri-row"><span class="nutri-label">' + col + '</span><div class="nutri-bar-bg"><div class="nutri-bar-fill" style="width:' + pct + '%;background:' + NUTRI_COLORS[i] + '"></div></div><span class="nutri-pct">' + pct + '%</span></div>';
+  });
 
-    btn.innerHTML = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.5 4.5L18 9l-4.5 1.5L12 15l-1.5-4.5L6 9l4.5-1.5z"/><path d="M5 3l.75 2.25L8 6l-2.25.75L5 9l-.75-2.25L2 6l2.25-.75z"/><path d="M19 15l.75 2.25L22 18l-2.25.75L19 21l-.75-2.25L16 18l2.25-.75z"/></svg> Generar menú';
-    btn.disabled = false;
-  }, 60);
+  document.getElementById('menu-content').innerHTML = html;
 }
-
-function calcDiversity(nutriPct) {
-  // Shannon entropy-based diversity index, normalised to 0-100
-  // nutriPct: array of % values for 8 categories (can be 0)
-  const total = nutriPct.reduce((a, b) => a + b, 0);
-  if (total === 0) return 0;
-
-  // Proportion of each category relative to total category hits
-  const props = nutriPct.map(p => p / total);
-
-  // Shannon entropy H = -sum(p * ln(p)) for p > 0
-  const H = props.reduce((sum, p) => p > 0 ? sum - p * Math.log(p) : sum, 0);
-
-  // Max entropy = ln(N) where N = number of categories with any presence
-  const N = props.filter(p => p > 0).length;
-  const H_max = N > 1 ? Math.log(N) : 1;
-
-  // Evenness (Pielou J): how evenly distributed among present categories
-  const evenness = H / H_max;
-
-  // Richness bonus: reward having more of the 8 categories represented
-  const richness = N / 8;
-
-  // Combined: 60% evenness + 40% richness, scaled to 0-100
-  return Math.round((0.6 * evenness + 0.4 * richness) * 100);
-}
-
 
 function showTab(name) {
-  ['generar', 'menu', 'platos'].forEach(t => {
-    document.getElementById('screen-' + t).classList.toggle('active', t === name);
-    document.getElementById('tab-' + t).classList.toggle('active', t === name);
+  ['generar','menu','platos'].forEach(t => {
+    document.getElementById('screen-'+t).classList.toggle('active', t===name);
+    document.getElementById('tab-'+t).classList.toggle('active', t===name);
   });
   if (name === 'platos') renderPlatos();
 }
-
 
 function setFilter(chip) {
   document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
@@ -2113,99 +1065,41 @@ function setFilter(chip) {
   renderPlatos();
 }
 
-// ── LOCAL STORAGE ────────────────────────────────────────────────────────────
-const LS_KEY = 'menuator_local_changes';
-let localChanges = false;
-
-function loadLocalOverrides() {
-  try {
-    const saved = localStorage.getItem(LS_KEY);
-    if (saved) {
-      const parsed = JSON.parse(saved);
-      DB = parsed;
-      localChanges = true;
-    }
-  } catch(e) {}
-}
-
 function saveLocal() {
   try {
     localStorage.setItem(LS_KEY, JSON.stringify(DB));
     localChanges = true;
-    document.getElementById('export-bar').classList.add('visible');
-  } catch(e) {
-    alert('Error al guardar localmente.');
-  }
+    const eb = document.getElementById('export-bar');
+    if (eb) eb.classList.add('visible');
+  } catch(e) { alert('Error al guardar localmente.'); }
 }
 
 function exportCSV() {
   const COLS = ['Comida','Ingredientes','Carne','Ave','Pescado','Verdura','Legumbres','CH','Huevo','Lacteos','Facil','Cena'];
   const rows = [COLS.join(';')];
-  DB.forEach(p => {
-    const row = [
-      p.name,
-      p.Ingredientes || '',
-      p.Carne, p.Ave, p.Pescado, p.Verdura, p.Legumbres,
-      p.CH, p.Huevo, p.Lacteos, p.Facil, p.Cena
-    ];
-    rows.push(row.join(';'));
-  });
-  const blob = new Blob([rows.join('
-')], { type: 'text/csv;charset=utf-8;' });
+  DB.forEach(p => rows.push([p.name, p.Ingredientes||'', p.Carne, p.Ave, p.Pescado, p.Verdura, p.Legumbres, p.CH, p.Huevo, p.Lacteos, p.Facil, p.Cena].join(';')));
+  const blob = new Blob([rows.join('\n')], { type: 'text/csv;charset=utf-8;' });
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
-  a.href = url;
-  a.download = 'Comidas.csv';
-  a.click();
+  a.href = url; a.download = 'Comidas.csv'; a.click();
   URL.revokeObjectURL(url);
 }
 
-// ── MODAL STATE ──────────────────────────────────────────────────────────────
 const NUTRI_FIELDS = ['Carne','Ave','Pescado','Verdura','Legumbres','CH','Huevo','Lacteos'];
 const PROP_FIELDS  = [['Facil','Fácil'],['Cena','Solo cena']];
-let editingIndex = null;
-let deleteIndex  = null;
+let editingIndex = null, deleteIndex = null;
 
 function buildToggles() {
   const nutriEl = document.getElementById('toggle-nutri');
   const propsEl = document.getElementById('toggle-props');
-
-  nutriEl.innerHTML = NUTRI_FIELDS.map(f => `
-    <button class="toggle-btn" id="tog-${f}" onclick="toggleField('${f}')">
-      <div class="toggle-check" id="chk-${f}">
-        <svg width="10" height="10" viewBox="0 0 12 12" fill="none" stroke="white" stroke-width="2.2" stroke-linecap="round"><path d="M2 6l3 3 5-5"/></svg>
-      </div>
-      ${f}
-    </button>`).join('');
-
-  propsEl.innerHTML = PROP_FIELDS.map(([f,label]) => `
-    <button class="toggle-btn" id="tog-${f}" onclick="toggleField('${f}')">
-      <div class="toggle-check" id="chk-${f}">
-        <svg width="10" height="10" viewBox="0 0 12 12" fill="none" stroke="white" stroke-width="2.2" stroke-linecap="round"><path d="M2 6l3 3 5-5"/></svg>
-      </div>
-      ${label}
-    </button>`).join('');
+  if (!nutriEl || !propsEl) return;
+  nutriEl.innerHTML = NUTRI_FIELDS.map(f => '<button class="toggle-btn" id="tog-' + f + '" onclick="toggleField('' + f + '')"><div class="toggle-check"><svg width="10" height="10" viewBox="0 0 12 12" fill="none" stroke="white" stroke-width="2.2" stroke-linecap="round"><path d="M2 6l3 3 5-5"/></svg></div>' + f + '</button>').join('');
+  propsEl.innerHTML = PROP_FIELDS.map(([f,label]) => '<button class="toggle-btn" id="tog-' + f + '" onclick="toggleField('' + f + '')"><div class="toggle-check"><svg width="10" height="10" viewBox="0 0 12 12" fill="none" stroke="white" stroke-width="2.2" stroke-linecap="round"><path d="M2 6l3 3 5-5"/></svg></div>' + label + '</button>').join('');
 }
 
-function toggleField(field) {
-  const btn = document.getElementById('tog-' + field);
-  btn.classList.toggle('on');
-}
-
-function getFieldVal(field) {
-  return document.getElementById('tog-' + field).classList.contains('on') ? 1 : 0;
-}
-
-function setFieldVal(field, val) {
-  const btn = document.getElementById('tog-' + field);
-  if (val) btn.classList.add('on'); else btn.classList.remove('on');
-}
-
-function resetModal() {
-  document.getElementById('field-name').value = '';
-  document.getElementById('field-ingredientes').value = '';
-  [...NUTRI_FIELDS, 'Facil', 'Cena'].forEach(f => setFieldVal(f, 0));
-}
+function toggleField(f) { document.getElementById('tog-'+f).classList.toggle('on'); }
+function getFieldVal(f) { return document.getElementById('tog-'+f).classList.contains('on') ? 1 : 0; }
+function setFieldVal(f, v) { const b = document.getElementById('tog-'+f); if(v) b.classList.add('on'); else b.classList.remove('on'); }
 
 function openModal(idx) {
   buildToggles();
@@ -2215,69 +1109,45 @@ function openModal(idx) {
     document.getElementById('modal-title').textContent = 'Editar plato';
     document.getElementById('field-name').value = p.name;
     document.getElementById('field-ingredientes').value = p.Ingredientes || '';
-    [...NUTRI_FIELDS, 'Facil', 'Cena'].forEach(f => setFieldVal(f, p[f]));
+    [...NUTRI_FIELDS,'Facil','Cena'].forEach(f => setFieldVal(f, p[f]));
   } else {
     editingIndex = null;
     document.getElementById('modal-title').textContent = 'Nuevo plato';
-    resetModal();
+    document.getElementById('field-name').value = '';
+    document.getElementById('field-ingredientes').value = '';
+    [...NUTRI_FIELDS,'Facil','Cena'].forEach(f => setFieldVal(f, 0));
   }
   document.getElementById('modal-backdrop').classList.add('open');
   setTimeout(() => document.getElementById('field-name').focus(), 300);
 }
 
-function closeModal() {
-  document.getElementById('modal-backdrop').classList.remove('open');
-}
-
-function closeModalOnBackdrop(e) {
-  if (e.target === document.getElementById('modal-backdrop')) closeModal();
-}
+function closeModal() { document.getElementById('modal-backdrop').classList.remove('open'); }
+function closeModalOnBackdrop(e) { if(e.target===document.getElementById('modal-backdrop')) closeModal(); }
 
 function savePlato() {
   const name = document.getElementById('field-name').value.trim();
   if (!name) { document.getElementById('field-name').focus(); return; }
-
-  const plato = { name };
-  plato.Ingredientes = document.getElementById('field-ingredientes').value.trim();
-  [...NUTRI_FIELDS, 'Facil', 'Cena'].forEach(f => plato[f] = getFieldVal(f));
-
-  if (editingIndex !== null) {
-    DB[editingIndex] = plato;
-  } else {
-    DB.push(plato);
-  }
-
-  saveLocal();
-  closeModal();
-  renderPlatos();
+  const plato = { name, Ingredientes: document.getElementById('field-ingredientes').value.trim() };
+  [...NUTRI_FIELDS,'Facil','Cena'].forEach(f => plato[f] = getFieldVal(f));
+  if (editingIndex !== null) DB[editingIndex] = plato; else DB.push(plato);
+  saveLocal(); closeModal(); renderPlatos();
 }
 
-// ── DELETE ───────────────────────────────────────────────────────────────────
 function openConfirmDelete(idx) {
   deleteIndex = idx;
-  document.getElementById('confirm-msg').textContent =
-    '¿Eliminar "' + DB[idx].name + '"? Esta acción no se puede deshacer.';
+  document.getElementById('confirm-msg').textContent = '¿Eliminar "' + DB[idx].name + '"? Esta acción no se puede deshacer.';
   document.getElementById('confirm-backdrop').classList.add('open');
 }
 
-function closeConfirm() {
-  document.getElementById('confirm-backdrop').classList.remove('open');
-  deleteIndex = null;
-}
-
-function closeConfirmOnBackdrop(e) {
-  if (e.target === document.getElementById('confirm-backdrop')) closeConfirm();
-}
+function closeConfirm() { document.getElementById('confirm-backdrop').classList.remove('open'); deleteIndex = null; }
+function closeConfirmOnBackdrop(e) { if(e.target===document.getElementById('confirm-backdrop')) closeConfirm(); }
 
 function confirmDelete() {
   if (deleteIndex === null) return;
   DB.splice(deleteIndex, 1);
-  saveLocal();
-  closeConfirm();
-  renderPlatos();
+  saveLocal(); closeConfirm(); renderPlatos();
 }
 
-// ── OVERRIDE renderPlatos to add edit/delete buttons ─────────────────────────
 function renderPlatos() {
   const query = (document.getElementById('search-input').value || '').toLowerCase();
   const filtered = DB.map((p, i) => ({ p, i })).filter(({ p }) => {
@@ -2287,39 +1157,26 @@ function renderPlatos() {
     if (activeFilter === 'Cena') return matchName && p.Cena;
     return matchName && p[activeFilter];
   });
-
   if (!filtered.length) {
-    document.getElementById('platos-list').innerHTML =
-      '<div class="empty-state">' +
-      '<svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="opacity:.4;margin-bottom:12px"><circle cx="12" cy="12" r="9"/><path d="M9 9h.01M15 9h.01M9 15h6"/></svg>' +
-      '<div class="empty-title">Sin resultados</div><p>No hay platos con estos filtros.</p></div>';
+    document.getElementById('platos-list').innerHTML = '<div class="empty-state"><svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" style="opacity:.4;margin-bottom:12px"><circle cx="12" cy="12" r="9"/><path d="M9 9h.01M15 9h.01M9 15h6"/></svg><div class="empty-title">Sin resultados</div><p>No hay platos con estos filtros.</p></div>';
     return;
   }
-
   let html = '';
   filtered.forEach(({ p, i }) => {
     const cats = NUTRI_FIELDS.filter(c => p[c]).join(' · ') || 'Sin categoría';
-    html += `<div class="plato-row">
-      <div style="flex:1;min-width:0">
-        <div class="plato-name">${p.name}${p.Ingredientes ? '' : ''}</div>
-        <div class="plato-cats">${cats}</div>
-      </div>
-      <div style="display:flex;align-items:center;gap:6px;flex-shrink:0">
-        ${p.Facil ? '<span class="tag tag-facil">fácil</span>' : ''}
-        ${p.Cena  ? '<span class="tag tag-cena">cena</span>'  : ''}
-        <button class="icon-btn edit" onclick="openModal(${i})" aria-label="Editar">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-        </button>
-        <button class="icon-btn delete" onclick="openConfirmDelete(${i})" aria-label="Eliminar">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6"/></svg>
-        </button>
-      </div>
-    </div>`;
+    html += '<div class="plato-row"><div style="flex:1;min-width:0"><div class="plato-name">' + p.name + '</div><div class="plato-cats">' + cats + '</div></div>'
+      + '<div style="display:flex;align-items:center;gap:6px;flex-shrink:0">'
+      + (p.Facil ? '<span class="tag tag-facil">fácil</span>' : '')
+      + (p.Cena  ? '<span class="tag tag-cena">cena</span>'  : '')
+      + '<button class="icon-btn edit" onclick="openModal(' + i + ')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button>'
+      + '<button class="icon-btn delete" onclick="openConfirmDelete(' + i + ')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6"/></svg></button>'
+      + '</div></div>';
   });
   document.getElementById('platos-list').innerHTML = html;
 }
 
 loadDB();
 
+</script>
 </body>
 </html>
