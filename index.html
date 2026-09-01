@@ -7,7 +7,6 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="MenuAtor">
-<link rel="manifest" href="manifest.json">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <title>MenuAtor 2000</title>
@@ -1073,7 +1072,6 @@ function renderMenu(menu, L, D) {
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="MenuAtor">
-<link rel="manifest" href="manifest.json">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <title>MenuAtor 2000</title>
@@ -2322,14 +2320,5 @@ function renderPlatos() {
 
 loadDB();
 
-<script>
-  if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-      navigator.serviceWorker.register('/MenuAtor2000/service-worker.js')
-        .then(reg => console.log('SW registered:', reg.scope))
-        .catch(err => console.log('SW error:', err));
-    });
-  }
-</script>
 </body>
 </html>
